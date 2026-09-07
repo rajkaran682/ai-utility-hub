@@ -1,154 +1,108 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="AI Utility Hub - free online AI, image, text, calculator and file tools in one place.">
-  <meta name="theme-color" content="#111827">
-  <title>AI Utility Hub — Free Online Tools</title>
-  <link rel="stylesheet" href="/style.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Free online AI utility hub: calculators, text tools, image tools, converters, developer tools and productivity utilities.">
+<meta name="keywords" content="online tools, word counter, image compressor, QR generator, EMI calculator, JSON formatter, unit converter">
+<title>AI Utility Hub — Free Online Tools</title>
+<link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<header class="topbar">
-  <a class="brand" href="#">⚡ AI Utility Hub</a>
+<header>
+  <div class="nav">
+    <a class="brand" href="#">
+      <span>⚡</span>
+      <b data-i18n="brand">AI Utility Hub</b>
+    </a>
 
-  <nav>
-    <a href="#tools">Tools</a>
-    <a href="#popular">Popular</a>
-    <button id="themeBtn" class="icon-btn" aria-label="Toggle theme">☾</button>
-  </nav>
+    <div class="nav-actions">
+      <button id="langBtn" class="ghost">हिन्दी</button>
+      <button id="themeBtn" class="ghost">☾</button>
+    </div>
+  </div>
 </header>
 
 <main>
 
 <section class="hero">
+  <div class="pill">
+    ⚡ <span data-i18n="tag">40+ free tools • No API key needed</span>
+  </div>
 
-  <span class="badge">100+ tools roadmap • Free to start</span>
+  <h1 data-i18n="heroTitle">
+    One place for everyday digital work.
+  </h1>
 
-  <h1>One place for your everyday digital work.</h1>
-
-  <p>
-    Write, calculate, convert, compress and create — fast and simple.
+  <p data-i18n="heroText">
+    Write, calculate, convert, compress and create — fast, simple and mobile-friendly.
   </p>
 
-  <div class="search-wrap">
+  <div class="search">
     <span>⌕</span>
-
     <input
       id="search"
-      placeholder="Search tools, e.g. percentage, word counter, image compressor..."
-      autocomplete="off"
+      data-i18n-placeholder="search"
+      placeholder="Search tools…"
     >
   </div>
-
-  <div class="quick">
-
-    <button data-jump="word-counter">
-      Word Counter
-    </button>
-
-    <button data-jump="percentage">
-      Percentage
-    </button>
-
-    <button data-jump="password">
-      Password Generator
-    </button>
-
-    <button data-jump="image-compressor">
-      Image Compressor
-    </button>
-
-  </div>
-
 </section>
 
+<section class="toolbar">
+  <div id="cats" class="chips"></div>
+</section>
 
-<section id="popular" class="section">
-
+<section id="tools">
   <div class="section-head">
-    <h2>Popular tools</h2>
-    <span>Free</span>
+    <h2 data-i18n="popular">Popular tools</h2>
+    <span id="count"></span>
   </div>
 
-  <div id="popularGrid" class="grid"></div>
-
+  <div id="grid" class="grid"></div>
 </section>
-
-
-<section id="tools" class="section">
-
-  <div class="section-head">
-
-    <h2>All tools</h2>
-
-    <div id="filters" class="filters"></div>
-
-  </div>
-
-  <div id="toolGrid" class="grid"></div>
-
-</section>
-
 
 <section class="pro">
-
   <div>
+    <span class="pill">✨ AI Pro</span>
 
-    <span class="badge">
-      Coming soon
-    </span>
+    <h2 data-i18n="proTitle">
+      More powerful tools are coming.
+    </h2>
 
-    <h2>AI Pro</h2>
-
-    <p>
-      Unlimited premium tools, faster processing and an ad-free experience.
+    <p data-i18n="proText">
+      AI writing, document assistants, smart image tools and accounts are planned next.
     </p>
-
   </div>
 
-  <button
-    onclick="alert('Pro subscriptions will be connected in the next phase.')"
-  >
-    Notify me
-  </button>
-
+  <a href="#tools" class="btn" data-i18n="explore">
+    Explore tools
+  </a>
 </section>
 
 </main>
 
-
-<div id="modal" class="modal hidden">
-
-  <div class="modal-card">
-
-    <button id="closeModal" class="close">
-      ×
-    </button>
-
-    <div id="modalBody"></div>
-
-  </div>
-
-</div>
-
-
 <footer>
-
-  <strong>
-    ⚡ AI Utility Hub
-  </strong>
-
-  <span>
-    Built for speed • Privacy-first browser tools
+  © <span id="year"></span> AI Utility Hub ·
+  <span data-i18n="footer">
+    Fast browser-based utilities.
   </span>
-
 </footer>
 
+<div id="modal" class="modal hidden">
+  <div class="modal-card">
+    <button id="close" class="close">×</button>
 
-<script src="/app.js"></script>
+    <h2 id="modalTitle"></h2>
+
+    <p id="modalDesc" class="muted"></p>
+
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<script src="app.js"></script>
 
 </body>
 </html>
