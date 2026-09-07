@@ -1,18 +1,33 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="Free online AI utility hub: calculators, text tools, image tools, converters, developer tools and productivity utilities.">
-<meta name="keywords" content="online tools, word counter, image compressor, QR generator, EMI calculator, JSON formatter, unit converter">
-<title>AI Utility Hub — Free Online Tools</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="utf-8">
+
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+
+  <meta name="description" content="AI Utility Hub is a free online tools website with calculators, text tools, image tools, PDF tools, converters, developer utilities and more. Fast, simple and mobile-friendly.">
+
+  <meta name="keywords" content="free online tools, AI tools, online calculator, word counter, image compressor, PDF tools, QR code generator, JSON formatter, unit converter, text tools, developer tools">
+
+  <meta name="robots" content="index, follow">
+
+  <link rel="canonical" href="https://ai-utility-hub.onrender.com/">
+
+  <meta property="og:title" content="AI Utility Hub - 100+ Free Online Tools">
+  <meta property="og:description" content="Free online calculators, text tools, image tools, PDF tools, converters and productivity utilities.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://ai-utility-hub.onrender.com/">
+
+  <title>AI Utility Hub - 100+ Free Online Tools, AI Tools & Calculators</title>
+
+  <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
 <header>
   <div class="nav">
+
     <a class="brand" href="#">
       <span>⚡</span>
       <b data-i18n="brand">AI Utility Hub</b>
@@ -22,14 +37,19 @@
       <button id="langBtn" class="ghost">हिन्दी</button>
       <button id="themeBtn" class="ghost">☾</button>
     </div>
+
   </div>
 </header>
 
 <main>
 
 <section class="hero">
+
   <div class="pill">
-    ⚡ <span data-i18n="tag">40+ free tools • No API key needed</span>
+    ⚡
+    <span data-i18n="tag">
+      40+ free tools • No API key needed
+    </span>
   </div>
 
   <h1 data-i18n="heroTitle">
@@ -46,26 +66,45 @@
       id="search"
       data-i18n-placeholder="search"
       placeholder="Search tools…"
+      type="search"
+      autocomplete="off"
     >
   </div>
+
 </section>
+
 
 <section class="toolbar">
+
   <div id="cats" class="chips"></div>
+
 </section>
 
+
 <section id="tools">
+
   <div class="section-head">
-    <h2 data-i18n="popular">Popular tools</h2>
+
+    <h2 data-i18n="popular">
+      Popular tools
+    </h2>
+
     <span id="count"></span>
+
   </div>
 
   <div id="grid" class="grid"></div>
+
 </section>
 
+
 <section class="pro">
+
   <div>
-    <span class="pill">✨ AI Pro</span>
+
+    <span class="pill">
+      ✨ AI Pro
+    </span>
 
     <h2 data-i18n="proTitle">
       More powerful tools are coming.
@@ -74,33 +113,77 @@
     <p data-i18n="proText">
       AI writing, document assistants, smart image tools and accounts are planned next.
     </p>
+
   </div>
 
   <a href="#tools" class="btn" data-i18n="explore">
     Explore tools
   </a>
+
+</section>
+
+
+<section class="seo-content">
+
+  <h2>Free Online Tools for Everyone</h2>
+
+  <p>
+    AI Utility Hub provides fast and easy-to-use online tools for everyday
+    digital work. Use our free calculators, text utilities, image tools,
+    converters, developer tools and productivity tools directly from your
+    browser.
+  </p>
+
+  <h2>100+ Tools Planned</h2>
+
+  <p>
+    Our goal is to build a large collection of useful online tools including
+    AI tools, PDF utilities, image tools, video tools, audio tools,
+    calculators, converters, writing tools and developer utilities.
+  </p>
+
+  <h2>Fast, Simple and Mobile Friendly</h2>
+
+  <p>
+    AI Utility Hub is designed to work smoothly on phones, tablets and
+    computers. Many tools work directly in your browser without requiring
+    an account or API key.
+  </p>
+
 </section>
 
 </main>
 
+
 <footer>
+
   © <span id="year"></span> AI Utility Hub ·
+
   <span data-i18n="footer">
     Fast browser-based utilities.
   </span>
+
 </footer>
 
+
 <div id="modal" class="modal hidden">
+
   <div class="modal-card">
-    <button id="close" class="close">×</button>
+
+    <button id="close" class="close">
+      ×
+    </button>
 
     <h2 id="modalTitle"></h2>
 
     <p id="modalDesc" class="muted"></p>
 
     <div id="modalBody"></div>
+
   </div>
+
 </div>
+
 
 <script src="app.js"></script>
 
