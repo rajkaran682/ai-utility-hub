@@ -6033,3 +6033,238 @@ console.log("PART 6 TOOL RUN HOOK LOADED");
   );
 
 })();
+/* =========================================
+   PART 8A — CONNECT NEW TOOL FUNCTIONS
+   ========================================= */
+
+(function(){
+
+  const oldOpenTool = openTool;
+
+  openTool = function(id){
+
+    /* पहले पुराना Tool UI खोलो */
+    oldOpenTool(id);
+
+    /* हमारे नए function की जानकारी */
+    const fnName = window.aiUtilityP7 && window.aiUtilityP7[id];
+
+    if(!fnName) return;
+
+    const fn = window[fnName];
+
+    if(typeof fn !== "function"){
+      console.warn("Tool function not found:", fnName);
+      return;
+    }
+
+    /* Run button को ढूँढो */
+    const body = document.querySelector("#modalBody");
+
+    if(!body) return;
+
+    /* नया Run button */
+    const oldButtons = body.querySelectorAll("button");
+
+    let runButton = null;
+
+    oldButtons.forEach(btn=>{
+      const text = (btn.textContent || "").toLowerCase();
+
+      if(
+        text.includes("analyze") ||
+        text.includes("convert") ||
+        text.includes("generate") ||
+        text.includes("calculate") ||
+        text.includes("check") ||
+        text.includes("run")
+      ){
+        runButton = btn;
+      }
+    });
+
+    if(runButton){
+
+      runButton.onclick = function(e){
+
+        e.preventDefault();
+
+        try{
+          fn();
+        }catch(error){
+          console.error("Tool error:", error);
+
+          alert(
+            "इस Tool में error आया। कृपया input सही तरीके से भरें।"
+          );
+        }
+
+      };
+
+    }
+
+  };
+
+  console.log("PART 8A TOOL CONNECTOR LOADED");
+
+})();
+/* =========================================
+   PART 8B — SAFE TOOL EXECUTION
+   ========================================= */
+
+(function(){
+
+  window.aiUtilityExecute = function(id){
+
+    const map = window.aiUtilityP7 || {};
+    const fnName = map[id];
+
+    if(!fnName){
+      console.warn("No function mapped for:", id);
+      return false;
+    }
+
+    const fn = window[fnName];
+
+    if(typeof fn !== "function"){
+      console.warn("Function not available:", fnName);
+      return false;
+    }
+
+    try{
+      fn();
+      return true;
+    }catch(error){
+
+      console.error("Tool execution error:", error);
+
+      const result = document.querySelector("#result");
+
+      if(result){
+        result.textContent =
+          "Error: कृपया सभी जरूरी जानकारी सही तरीके से भरें।";
+      }
+
+      return false;
+    }
+
+  };
+
+  console.log("PART 8B SAFE EXECUTION LOADED");
+
+})();
+/* =========================================
+   PART 8C — TOOL RESULT DOWNLOAD
+   ========================================= */
+
+(function(){
+
+  window.aiUtilityDownload = function(filename, content, type="text/plain"){
+
+    try{
+
+      const blob = new Blob([content], {type});
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+
+      a.href = url;
+      a.download = filename;
+
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+
+      setTimeout(()=>{
+        URL.revokeObjectURL(url);
+      },1000);
+
+      return true;
+
+    }catch(error){
+
+      console.error("Download error:", error);
+
+      alert("Download failed. Please try again.");
+
+      return false;
+    }
+
+  };
+
+
+  window.aiUtilityDownloadResult = function(filename="result.txt"){
+
+    const result = document.querySelector("#result");
+
+    if(!result){
+      alert("कोई result उपलब्ध नहीं है।");
+      return false;
+    }
+
+    const content = result.innerText || result.textContent || "";
+
+    if(!content.trim()){
+      alert("पहले Tool को Run करें।");
+      return false;
+    }
+
+    return window.aiUtilityDownload(
+      filename,
+      content,
+      "text/plain;charset=utf-8"
+    );
+
+  };
+
+
+  console.log("PART 8C DOWNLOAD SYSTEM LOADED");
+
+})();
+/* =========================================
+   PART 8D — DOWNLOAD BUTTON CONNECTOR
+   ========================================= */
+
+(function(){
+
+  function addDownloadButton(){
+
+    const result = document.querySelector("#result");
+
+    if(!result) return;
+
+    if(document.querySelector("#aiDownloadResult")) return;
+
+    const box = document.createElement("div");
+
+    box.className = "tool-actions";
+
+    box.innerHTML = `
+      <button id="aiDownloadResult" class="btn">
+        ⬇️ Download Result
+      </button>
+    `;
+
+    result.parentNode.insertBefore(box, result.nextSibling);
+
+    document
+      .querySelector("#aiDownloadResult")
+      .addEventListener("click", function(){
+
+        window.aiUtilityDownloadResult("ai-utility-result.txt");
+
+      });
+
+  }
+
+
+  window.aiUtilityAddDownload = function(){
+
+    setTimeout(addDownloadButton, 50);
+
+  };
+
+
+  console.log("PART 8D DOWNLOAD BUTTON LOADED");
+
+})();
