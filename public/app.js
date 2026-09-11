@@ -6268,3 +6268,127 @@ console.log("PART 6 TOOL RUN HOOK LOADED");
   console.log("PART 8D DOWNLOAD BUTTON LOADED");
 
 })();
+/* =========================================
+   PART 9 — FINAL TOOL + DOWNLOAD CONNECTOR
+   ========================================= */
+
+(function(){
+
+  window.aiUtilityConnectTool = function(){
+
+    const result = document.querySelector("#result");
+
+    if(!result) return;
+
+    /* Download button already exists */
+    if(document.querySelector("#aiDownloadResult")){
+      return;
+    }
+
+    const wrap = document.createElement("div");
+
+    wrap.className = "tool-actions";
+
+    const btn = document.createElement("button");
+
+    btn.id = "aiDownloadResult";
+    btn.className = "btn";
+    btn.type = "button";
+    btn.textContent = "⬇️ Download Result";
+
+    btn.onclick = function(){
+
+      const r = document.querySelector("#result");
+
+      if(!r){
+        alert("Result नहीं मिला।");
+        return;
+      }
+
+      const text =
+        r.innerText ||
+        r.textContent ||
+        "";
+
+      if(!text.trim()){
+        alert("पहले Tool को Run करें।");
+        return;
+      }
+
+      const blob = new Blob(
+        [text],
+        {type:"text/plain;charset=utf-8"}
+      );
+
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+
+      a.href = url;
+      a.download = "ai-utility-result.txt";
+
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+
+      setTimeout(function(){
+        URL.revokeObjectURL(url);
+      },1000);
+
+    };
+
+    wrap.appendChild(btn);
+
+    result.parentNode.insertBefore(
+      wrap,
+      result.nextSibling
+    );
+
+  };
+
+
+  /* Automatically connect after tool output */
+
+  const oldOut = window.out;
+
+  if(typeof oldOut === "function"){
+
+    window.out = function(value){
+
+      oldOut(value);
+
+      setTimeout(function(){
+        window.aiUtilityConnectTool();
+      },50);
+
+    };
+
+  }
+
+
+  /* Also connect when modal/tool content changes */
+
+  const observer = new MutationObserver(function(){
+
+    setTimeout(function(){
+      window.aiUtilityConnectTool();
+    },50);
+
+  });
+
+  const modalBody =
+    document.querySelector("#modalBody");
+
+  if(modalBody){
+
+    observer.observe(modalBody,{
+      childList:true,
+      subtree:true
+    });
+
+  }
+
+
+  console.log("PART 9 FINAL CONNECTOR LOADED");
+
+})();
