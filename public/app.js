@@ -6595,3 +6595,127 @@ console.log("PART 6 TOOL RUN HOOK LOADED");
   );
 
 })();
+/* =========================================
+   PART 11 — DOWNLOAD RESULT BUTTON
+   ========================================= */
+
+(function(){
+
+  window.addResultDownloadButton = function(){
+
+    const output = document.querySelector("#output");
+
+    if(!output) return;
+
+    /* पुराने button को हटाकर नया नहीं बनाएंगे */
+    if(document.querySelector("#finalDownloadResult")){
+      return;
+    }
+
+    const actions = document.createElement("div");
+
+    actions.className = "tool-actions";
+    actions.id = "finalDownloadActions";
+
+    const button = document.createElement("button");
+
+    button.id = "finalDownloadResult";
+    button.className = "btn";
+    button.type = "button";
+    button.textContent = "⬇️ Download Result";
+
+    button.onclick = function(){
+
+      const result = document.querySelector("#output");
+
+      if(!result){
+        alert("Result नहीं मिला।");
+        return;
+      }
+
+      const text = (
+        result.innerText ||
+        result.textContent ||
+        ""
+      ).trim();
+
+      if(!text){
+
+        alert("पहले Tool को Run करें।");
+
+        return;
+      }
+
+      const blob = new Blob(
+        [text],
+        {
+          type:"text/plain;charset=utf-8"
+        }
+      );
+
+      const url = URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+
+      link.href = url;
+      link.download = "ai-utility-result.txt";
+
+      document.body.appendChild(link);
+
+      link.click();
+
+      link.remove();
+
+      setTimeout(function(){
+
+        URL.revokeObjectURL(url);
+
+      },1000);
+
+    };
+
+    actions.appendChild(button);
+
+    output.insertAdjacentElement(
+      "afterend",
+      actions
+    );
+
+  };
+
+
+  /* Watch output area */
+
+  const observer = new MutationObserver(function(){
+
+    setTimeout(function(){
+
+      window.addResultDownloadButton();
+
+    },100);
+
+  });
+
+
+  observer.observe(document.body,{
+
+    childList:true,
+    subtree:true
+
+  });
+
+
+  /* Initial check */
+
+  setTimeout(function(){
+
+    window.addResultDownloadButton();
+
+  },300);
+
+
+  console.log(
+    "PART 11 DOWNLOAD BUTTON LOADED"
+  );
+
+})();
