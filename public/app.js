@@ -6392,3 +6392,206 @@ console.log("PART 6 TOOL RUN HOOK LOADED");
   console.log("PART 9 FINAL CONNECTOR LOADED");
 
 })();
+/* =========================================
+   PART 10 — FIRST 3 TOOLS FINAL UI TEST
+   ========================================= */
+
+(function(){
+
+  const oldOpenToolPart10 = window.openTool;
+
+  window.openTool = function(id){
+
+    const t = tools.find(x => x[0] === id);
+
+    if(!t){
+      return;
+    }
+
+    $("#modalTitle").textContent =
+      t[1] + " " + t[2];
+
+    $("#modalDesc").textContent =
+      t[3];
+
+    /* =========================
+       WORD COUNTER
+       ========================= */
+
+    if(id === "word"){
+
+      $("#modalBody").innerHTML = `
+        <textarea
+          id="toolInput"
+          class="field"
+          rows="8"
+          placeholder="यहाँ अपना text लिखें..."
+        ></textarea>
+
+        <div class="tool-actions">
+          <button
+            class="btn"
+            type="button"
+            data-tool-run="word"
+          >
+            Run
+          </button>
+
+          <button
+            class="btn"
+            type="button"
+            onclick="u4CopyResult()"
+          >
+            Copy
+          </button>
+        </div>
+
+        <div id="output" class="result"></div>
+      `;
+
+      $("#modal").classList.remove("hidden");
+
+      return;
+    }
+
+
+    /* =========================
+       PERCENTAGE CALCULATOR
+       ========================= */
+
+    if(id === "percent"){
+
+      $("#modalBody").innerHTML = `
+        <label>Value</label>
+
+        <input
+          id="percentValue"
+          class="field"
+          type="number"
+          placeholder="जैसे 500"
+        >
+
+        <label>Percent %</label>
+
+        <input
+          id="percentRate"
+          class="field"
+          type="number"
+          placeholder="जैसे 10"
+        >
+
+        <div class="tool-actions">
+
+          <button
+            class="btn"
+            type="button"
+            data-tool-run="percent"
+          >
+            Calculate
+          </button>
+
+        </div>
+
+        <div id="output" class="result"></div>
+      `;
+
+      $("#modal").classList.remove("hidden");
+
+      return;
+    }
+
+
+    /* =========================
+       IMAGE COMPRESSOR
+       ========================= */
+
+    if(id === "imagecompress"){
+
+      $("#modalBody").innerHTML = `
+        <label>Select Image</label>
+
+        <input
+          id="imageFile"
+          class="field"
+          type="file"
+          accept="image/*"
+        >
+
+        <div class="tool-actions">
+
+          <button
+            class="btn"
+            type="button"
+            data-tool-run="imagecompress"
+          >
+            Compress Image
+          </button>
+
+        </div>
+
+        <div id="output" class="result"></div>
+      `;
+
+      $("#modal").classList.remove("hidden");
+
+      return;
+    }
+
+
+    /* बाकी tools अभी पुराने UI से खुलेंगे */
+
+    oldOpenToolPart10(id);
+
+  };
+
+
+  /* =========================
+     RUN BUTTON
+     ========================= */
+
+  document.addEventListener("click", function(e){
+
+    const btn =
+      e.target.closest("[data-tool-run]");
+
+    if(!btn) return;
+
+    const id =
+      btn.getAttribute("data-tool-run");
+
+    if(!window.aiUtilityRun) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    try{
+
+      window.aiUtilityRun(id);
+
+    }catch(error){
+
+      console.error(
+        "PART 10 TOOL ERROR:",
+        error
+      );
+
+      const output =
+        document.querySelector("#output");
+
+      if(output){
+
+        output.textContent =
+          "❌ Tool में error आया।";
+
+      }
+
+    }
+
+  }, true);
+
+
+  console.log(
+    "PART 10 FIRST 3 TOOL UI LOADED"
+  );
+
+})();
