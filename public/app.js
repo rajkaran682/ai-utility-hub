@@ -6719,3 +6719,1018 @@ console.log("PART 6 TOOL RUN HOOK LOADED");
   );
 
 })();
+/* =========================================
+   PART 12 — ADVANCED IMAGE INFO
+   ========================================= */
+
+(function(){
+
+  window.openAdvancedImageInfo = function(){
+
+    $("#modalTitle").textContent =
+      "ℹ️ Image Info";
+
+    $("#modalDesc").textContent =
+      "Image metadata, camera, location और provenance signals की जाँच करें।";
+
+    $("#modalBody").innerHTML = `
+
+      <input
+        id="advancedImageFile"
+        class="field"
+        type="file"
+        accept="image/*"
+      >
+
+      <div class="tool-actions">
+
+        <button
+          id="analyzeAdvancedImage"
+          class="btn"
+          type="button"
+        >
+          🔍 Analyze Image
+        </button>
+
+      </div>
+
+      <div
+        id="advancedImageOutput"
+        class="result"
+      >
+        Image चुनें और Analyze Image दबाएँ।
+      </div>
+
+    `;
+
+    $("#modal").classList.remove("hidden");
+
+
+    $("#analyzeAdvancedImage").onclick =
+      async function(){
+
+        const input =
+          document.querySelector("#advancedImageFile");
+
+        const output =
+          document.querySelector("#advancedImageOutput");
+
+        if(!input || !input.files.length){
+
+          output.textContent =
+            "❌ पहले image चुनें।";
+
+          return;
+        }
+
+        const file = input.files[0];
+
+        output.innerHTML =
+          "⏳ Image की जानकारी जाँची जा रही है...";
+
+
+        try{
+
+          /* ---------- BASIC INFO ---------- */
+
+          const basic =
+            await new Promise(function(resolve,reject){
+
+              const img = new Image();
+
+              img.onload = function(){
+
+                resolve({
+                  width: img.naturalWidth,
+                  height: img.naturalHeight
+                });
+
+                URL.revokeObjectURL(img.src);
+
+              };
+
+              img.onerror = reject;
+
+              img.src =
+                URL.createObjectURL(file);
+
+            });
+
+
+          let metadata = {};
+
+          /* ---------- EXIF LIBRARY ---------- */
+
+          try{
+
+            const exifr =
+              await import(
+                "https://cdn.jsdelivr.net/npm/exifr@7.1.3/dist/lite.esm.mjs"
+              );
+
+            metadata =
+              await exifr.parse(
+                file,
+                {
+                  tiff:true,
+                  exif:true,
+                  xmp:true,
+                  icc:true,
+                  iptc:true,
+                  jfif:true,
+                  gps:true
+                }
+              ) || {};
+
+          }catch(metaError){
+
+            console.warn(
+              "Metadata parser unavailable:",
+              metaError
+            );
+
+          }
+
+
+          /* ---------- FORMAT ---------- */
+
+          const format =
+            file.type ||
+            "Unknown";
+
+
+          const sizeKB =
+            file.size / 1024;
+
+          const sizeText =
+            sizeKB >= 1024
+            ? (sizeKB / 1024).toFixed(2) + " MB"
+            : sizeKB.toFixed(2) + " KB";
+
+
+          /* ---------- ASPECT RATIO ---------- */
+
+          const gcd = function(a,b){
+
+            while(b){
+
+              const temp = b;
+
+              b = a % b;
+
+              a = temp;
+
+            }
+
+            return a;
+
+          };
+
+          const g =
+            gcd(
+              basic.width,
+              basic.height
+            );
+
+          const ratio =
+            (basic.width / g) +
+            ":" +
+            (basic.height / g);
+
+
+          /* ---------- CAMERA ---------- */
+
+          const cameraMake =
+            metadata.Make ||
+            metadata.make ||
+            "";
+
+          const cameraModel =
+            metadata.Model ||
+            metadata.model ||
+            "";
+
+          const camera =
+            [cameraMake,cameraModel]
+              .filter(Boolean)
+              .join(" ") ||
+            "Not available";
+
+
+          /* ---------- DATE ---------- */
+
+          const dateValue =
+            metadata.DateTimeOriginal ||
+            metadata.CreateDate ||
+            metadata.ModifyDate ||
+            metadata.DateTime ||
+            null;
+
+          const dateText =
+            dateValue
+            ? String(dateValue)
+            : "Not available";
+
+
+          /* ---------- SOFTWARE ---------- */
+
+          const software =
+            metadata.Software ||
+            metadata.software ||
+            "Not available";
+
+
+          /* ---------- GPS ---------- */
+
+          let gpsText =
+            "Not available";
+
+          let gpsMap =
+            "";
+
+          if(
+            typeof metadata.latitude === "number" &&
+            typeof metadata.longitude === "number"
+          ){
+
+            const lat =
+              metadata.latitude.toFixed(6);
+
+            const lon =
+              metadata.longitude.toFixed(6);
+
+            gpsText =
+              lat +
+              ", " +
+              lon;
+
+            gpsMap =
+              `<a
+                href="https://www.google.com/maps?q=${lat},${lon}"
+                target="_blank"
+                rel="noopener"
+              >
+                📍 Open GPS location
+              </a>`;
+
+          }
+
+
+          /* ---------- PROVENANCE / AI SIGNAL ---------- */
+
+          let aiStatus =
+            "Cannot determine";
+
+          let aiDetail =
+            "इस file से केवल metadata/provenance signals की जाँच की जा सकती है। इससे 100% AI या Original साबित नहीं किया जा सकता।";
+
+
+          const metadataText =
+            JSON.stringify(metadata)
+              .toLowerCase();
+
+
+          const aiKeywords = [
+
+            "c2pa",
+            "content credentials",
+            "generative ai",
+            "trainedalgorithmicmedia",
+            "ai-generated",
+            "ai generated",
+            "ai-edited",
+            "ai edited",
+            "adobe firefly",
+            "midjourney",
+            "dall-e",
+            "stable diffusion"
+
+          ];
+
+
+          const foundAI =
+            aiKeywords.some(function(keyword){
+
+              return metadataText.includes(keyword);
+
+            });
+
+
+          if(foundAI){
+
+            aiStatus =
+              "⚠️ AI / provenance signal detected";
+
+            aiDetail =
+              "Metadata में AI/provenance से संबंधित signal मिला है। इसे पूर्ण AI प्रमाण न मानें।";
+
+          }else{
+
+            aiStatus =
+              "ℹ️ No AI provenance signal found";
+
+            aiDetail =
+              "कोई स्पष्ट AI provenance signal नहीं मिला। इसका अर्थ यह नहीं कि image निश्चित रूप से original है।";
+
+          }
+
+
+          /* ---------- GPS / CAMERA CONCLUSION ---------- */
+
+          const cameraStatus =
+            camera !== "Not available"
+            ? "📷 Camera metadata मिला"
+            : "📷 Camera metadata उपलब्ध नहीं";
+
+
+          const locationStatus =
+            gpsText !== "Not available"
+            ? "📍 GPS location उपलब्ध"
+            : "📍 GPS location उपलब्ध नहीं";
+
+
+          /* ---------- OUTPUT ---------- */
+
+          output.innerHTML = `
+
+            <div style="line-height:1.8">
+
+              <h3>🖼️ Basic Information</h3>
+
+              <b>File:</b>
+              ${esc(file.name)}
+              <br>
+
+              <b>Type:</b>
+              ${esc(format)}
+              <br>
+
+              <b>Size:</b>
+              ${esc(sizeText)}
+              <br>
+
+              <b>Dimensions:</b>
+              ${basic.width} × ${basic.height} px
+              <br>
+
+              <b>Aspect Ratio:</b>
+              ${ratio}
+
+
+              <h3>📷 Camera / Metadata</h3>
+
+              <b>Camera:</b>
+              ${esc(camera)}
+              <br>
+
+              <b>Date/Time:</b>
+              ${esc(dateText)}
+              <br>
+
+              <b>Software:</b>
+              ${esc(String(software))}
+              <br>
+
+              ${cameraStatus}
+
+
+              <h3>📍 Location</h3>
+
+              <b>GPS:</b>
+              ${esc(gpsText)}
+              <br>
+
+              ${gpsMap}
+
+
+              <h3>🤖 AI / Provenance Check</h3>
+
+              <b>Status:</b>
+              ${esc(aiStatus)}
+              <br>
+
+              <small>
+                ${esc(aiDetail)}
+              </small>
+
+
+              <h3>🔐 Authenticity Note</h3>
+
+              <div>
+                यह tool metadata और उपलब्ध provenance signals
+                दिखाता है। Metadata मौजूद न होने पर image को
+                केवल इस आधार पर “Original” या “AI-generated”
+                घोषित नहीं किया जाएगा।
+              </div>
+
+            </div>
+
+          `;
+
+
+        }catch(error){
+
+          console.error(
+            "Advanced Image Info Error:",
+            error
+          );
+
+          output.innerHTML =
+            "❌ Image को पढ़ा नहीं जा सका। कृपया JPG/PNG/WebP image आज़माएँ।";
+
+        }
+
+      };
+
+  };
+
+
+  /* ---------- OVERRIDE IMAGE INFO TOOL ---------- */
+
+  const previousOpenTool =
+    window.openTool;
+
+  window.openTool = function(id){
+
+    if(id === "imageinfo"){
+
+      window.openAdvancedImageInfo();
+
+      return;
+
+    }
+
+    if(typeof previousOpenTool === "function"){
+
+      previousOpenTool(id);
+
+    }
+
+  };
+
+
+  console.log(
+    "PART 12 ADVANCED IMAGE INFO LOADED"
+  );
+
+})();
+/* =========================================
+   PART 12A — IMAGE INFO TEST FIX
+   ========================================= */
+
+(function(){
+
+  window.openAdvancedImageInfo = function(){
+
+    $("#modalTitle").textContent = "ℹ️ Image Info";
+
+    $("#modalDesc").textContent =
+      "Image की basic information, metadata और provenance signals जाँचें।";
+
+    $("#modalBody").innerHTML = `
+
+      <input
+        id="advancedImageFile"
+        class="field"
+        type="file"
+        accept="image/*"
+      >
+
+      <div class="tool-actions">
+
+        <button
+          id="analyzeAdvancedImage"
+          class="btn"
+          type="button"
+        >
+          🔍 Analyze Image
+        </button>
+
+      </div>
+
+      <div
+        id="advancedImageOutput"
+        class="result"
+      >
+        Image चुनें और Analyze Image दबाएँ।
+      </div>
+
+    `;
+
+    $("#modal").classList.remove("hidden");
+
+    /* पुराने Download buttons हटाएँ */
+    setTimeout(function(){
+
+      [
+        "#finalDownloadActions",
+        "#finalDownloadResult",
+        "#aiDownloadResult"
+      ].forEach(function(selector){
+
+        document
+          .querySelectorAll(selector)
+          .forEach(function(el){
+
+            const parent = el.closest(".tool-actions");
+
+            if(parent){
+              parent.remove();
+            }else{
+              el.remove();
+            }
+
+          });
+
+      });
+
+    },100);
+
+
+    $("#analyzeAdvancedImage").onclick =
+      async function(){
+
+        const input =
+          document.querySelector("#advancedImageFile");
+
+        const output =
+          document.querySelector("#advancedImageOutput");
+
+        if(!input || !input.files.length){
+
+          output.textContent =
+            "❌ पहले image चुनें।";
+
+          return;
+
+        }
+
+        const file = input.files[0];
+
+        output.innerHTML =
+          "⏳ Image की जानकारी जाँची जा रही है...";
+
+
+        try{
+
+          /* =========================
+             BASIC IMAGE INFORMATION
+             ========================= */
+
+          const basic =
+            await new Promise(function(resolve,reject){
+
+              const img = new Image();
+
+              const url =
+                URL.createObjectURL(file);
+
+              img.onload = function(){
+
+                resolve({
+
+                  width: img.naturalWidth,
+
+                  height: img.naturalHeight
+
+                });
+
+                URL.revokeObjectURL(url);
+
+              };
+
+              img.onerror = reject;
+
+              img.src = url;
+
+            });
+
+
+          /* =========================
+             METADATA
+             ========================= */
+
+          let metadata = {};
+
+          try{
+
+            const exifr =
+              await import(
+                "https://cdn.jsdelivr.net/npm/exifr@7.1.3/dist/lite.esm.mjs"
+              );
+
+            metadata =
+              await exifr.parse(
+                file,
+                {
+                  tiff:true,
+                  exif:true,
+                  xmp:true,
+                  icc:true,
+                  iptc:true,
+                  jfif:true,
+                  gps:true
+                }
+              ) || {};
+
+          }catch(error){
+
+            console.warn(
+              "Metadata parser unavailable:",
+              error
+            );
+
+          }
+
+
+          /* =========================
+             FILE SIZE
+             ========================= */
+
+          const sizeKB =
+            file.size / 1024;
+
+          const sizeText =
+            sizeKB >= 1024
+            ? (sizeKB / 1024).toFixed(2) + " MB"
+            : sizeKB.toFixed(2) + " KB";
+
+
+          /* =========================
+             ASPECT RATIO
+             ========================= */
+
+          function gcd(a,b){
+
+            while(b){
+
+              const t=b;
+
+              b=a%b;
+
+              a=t;
+
+            }
+
+            return a;
+
+          }
+
+          const g =
+            gcd(
+              basic.width,
+              basic.height
+            );
+
+          const ratio =
+            basic.width/g +
+            ":" +
+            basic.height/g;
+
+
+          /* =========================
+             CAMERA
+             ========================= */
+
+          const cameraMake =
+            metadata.Make ||
+            metadata.make ||
+            "";
+
+          const cameraModel =
+            metadata.Model ||
+            metadata.model ||
+            "";
+
+          const camera =
+            [cameraMake,cameraModel]
+              .filter(Boolean)
+              .join(" ") ||
+            "Not available";
+
+
+          /* =========================
+             DATE
+             ========================= */
+
+          const dateValue =
+            metadata.DateTimeOriginal ||
+            metadata.CreateDate ||
+            metadata.ModifyDate ||
+            metadata.DateTime ||
+            null;
+
+          const dateText =
+            dateValue
+            ? String(dateValue)
+            : "Not available";
+
+
+          /* =========================
+             SOFTWARE
+             ========================= */
+
+          const software =
+            metadata.Software ||
+            metadata.software ||
+            "Not available";
+
+
+          /* =========================
+             GPS
+             ========================= */
+
+          let gpsText =
+            "Not available";
+
+          let gpsLink = "";
+
+          if(
+            typeof metadata.latitude === "number" &&
+            typeof metadata.longitude === "number"
+          ){
+
+            const lat =
+              metadata.latitude.toFixed(6);
+
+            const lon =
+              metadata.longitude.toFixed(6);
+
+            gpsText =
+              lat + ", " + lon;
+
+            gpsLink = `
+
+              <a
+                href="https://www.google.com/maps?q=${lat},${lon}"
+                target="_blank"
+                rel="noopener"
+              >
+                📍 Open GPS Location
+              </a>
+
+            `;
+
+          }
+
+
+          /* =========================
+             AI / PROVENANCE
+             ========================= */
+
+          const metadataText =
+            JSON.stringify(metadata)
+              .toLowerCase();
+
+
+          const aiSignals = [
+
+            "trainedalgorithmicmedia",
+
+            "ai-generated",
+
+            "ai generated",
+
+            "ai-edited",
+
+            "ai edited",
+
+            "generative ai",
+
+            "c2pa.ai-disclosure",
+
+            "adobe firefly",
+
+            "midjourney",
+
+            "dall-e",
+
+            "stable diffusion"
+
+          ];
+
+
+          const c2paSignal =
+            metadataText.includes("c2pa");
+
+
+          const aiSignal =
+            aiSignals.some(function(keyword){
+
+              return metadataText.includes(keyword);
+
+            });
+
+
+          let aiStatus;
+
+          let aiDetail;
+
+
+          if(aiSignal){
+
+            aiStatus =
+              "⚠️ AI provenance signal detected";
+
+            aiDetail =
+              "Metadata में AI generation/editing से संबंधित signal मिला। यह metadata/provenance signal है, अकेले 100% निर्णायक प्रमाण नहीं।";
+
+          }else if(c2paSignal){
+
+            aiStatus =
+              "ℹ️ C2PA provenance found";
+
+            aiDetail =
+              "C2PA provenance signal मिला है। यह अपने आप image को AI-generated नहीं बताता; C2PA में human और AI दोनों प्रकार की provenance दर्ज हो सकती है।";
+
+          }else{
+
+            aiStatus =
+              "ℹ️ No AI provenance signal found";
+
+            aiDetail =
+              "कोई स्पष्ट AI provenance signal नहीं मिला। इसका अर्थ यह नहीं है कि image निश्चित रूप से original है।";
+
+          }
+
+
+          /* =========================
+             METADATA STATUS
+             ========================= */
+
+          const metadataKeys =
+            Object.keys(metadata);
+
+
+          const metadataStatus =
+            metadataKeys.length
+            ? "Metadata मिला"
+            : "Metadata उपलब्ध नहीं";
+
+
+          /* =========================
+             OUTPUT
+             ========================= */
+
+          output.innerHTML = `
+
+            <div style="line-height:1.8">
+
+              <h3>🖼️ Basic Information</h3>
+
+              <b>File:</b>
+              ${esc(file.name)}
+              <br>
+
+              <b>Type:</b>
+              ${esc(file.type || "Unknown")}
+              <br>
+
+              <b>Size:</b>
+              ${esc(sizeText)}
+              <br>
+
+              <b>Dimensions:</b>
+              ${basic.width} × ${basic.height} px
+              <br>
+
+              <b>Aspect Ratio:</b>
+              ${ratio}
+              <br>
+
+
+              <h3>📷 Camera / Metadata</h3>
+
+              <b>Camera:</b>
+              ${esc(camera)}
+              <br>
+
+              <b>Date/Time:</b>
+              ${esc(dateText)}
+              <br>
+
+              <b>Software:</b>
+              ${esc(String(software))}
+              <br>
+
+              <b>Metadata:</b>
+              ${metadataStatus}
+              <br>
+
+
+              <h3>📍 Location</h3>
+
+              <b>GPS:</b>
+              ${esc(gpsText)}
+              <br>
+
+              ${gpsLink}
+
+
+              <h3>🤖 AI / Provenance Check</h3>
+
+              <b>Status:</b>
+              ${esc(aiStatus)}
+              <br>
+
+              <small>
+                ${esc(aiDetail)}
+              </small>
+
+
+              <h3>🔐 Important</h3>
+
+              <div>
+                यह जांच उपलब्ध metadata और provenance
+                signals पर आधारित है। Metadata न मिलने पर
+                image को “Original” या “AI-generated”
+                निश्चित रूप से घोषित नहीं किया जाएगा।
+              </div>
+
+            </div>
+
+          `;
+
+
+          /* फिर से Download button न आने दें */
+
+          setTimeout(function(){
+
+            [
+              "#finalDownloadActions",
+              "#finalDownloadResult",
+              "#aiDownloadResult"
+            ].forEach(function(selector){
+
+              document
+                .querySelectorAll(selector)
+                .forEach(function(el){
+
+                  const parent =
+                    el.closest(".tool-actions");
+
+                  if(parent){
+                    parent.remove();
+                  }else{
+                    el.remove();
+                  }
+
+                });
+
+            });
+
+          },150);
+
+
+        }catch(error){
+
+          console.error(
+            "Advanced Image Info Error:",
+            error
+          );
+
+          output.innerHTML =
+            "❌ Image को पढ़ा नहीं जा सका। JPG/PNG/WebP image आज़माएँ।";
+
+        }
+
+      };
+
+  };
+
+
+  /* =========================
+     IMAGE INFO OPEN OVERRIDE
+     ========================= */
+
+  const previousOpenTool12A =
+    window.openTool;
+
+
+  window.openTool = function(id){
+
+    if(id === "imageinfo"){
+
+      window.openAdvancedImageInfo();
+
+      return;
+
+    }
+
+
+    if(
+      typeof previousOpenTool12A === "function"
+    ){
+
+      previousOpenTool12A(id);
+
+    }
+
+  };
+
+
+  console.log(
+    "PART 12A IMAGE INFO TEST FIX LOADED"
+  );
+
+})();
